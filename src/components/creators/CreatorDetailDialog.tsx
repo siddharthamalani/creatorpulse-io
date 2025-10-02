@@ -1,4 +1,5 @@
-import { X, Video, Image as ImageIcon, ThumbsUp, MessageCircle } from "lucide-react";
+import { useState } from "react";
+import { X, Video, Image as ImageIcon, ThumbsUp, MessageCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,7 +17,15 @@ interface CreatorDetailDialogProps {
 const COLORS = ["#8b5cf6", "#06b6d4", "#f59e0b", "#10b981", "#ef4444"];
 
 export function CreatorDetailDialog({ creator, open, onClose }: CreatorDetailDialogProps) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const postsPerPage = 10;
+  
   if (!creator) return null;
+
+  const totalPages = Math.ceil(creator.posts.length / postsPerPage);
+  const startIndex = (currentPage - 1) * postsPerPage;
+  const endIndex = startIndex + postsPerPage;
+  const currentPosts = creator.posts.slice(startIndex, endIndex);
 
   const followersData = creator.platformStats.map((stat) => ({
     name: stat.platform,
@@ -166,11 +175,16 @@ export function CreatorDetailDialog({ creator, open, onClose }: CreatorDetailDia
               </div>
             </div>
 
-            {/* Top 10 Posts */}
+            {/* Top Posts */}
             <div className="space-y-4">
-              <h3 className="text-xl font-bold">Top 10 Posts</h3>
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-bold">Top Posts</h3>
+                <div className="text-sm text-muted-foreground">
+                  Showing {startIndex + 1}-{Math.min(endIndex, creator.posts.length)} of {creator.posts.length}
+                </div>
+              </div>
               <div className="grid grid-cols-2 gap-4">
-                {creator.posts.slice(0, 10).map((post) => (
+                {currentPosts.map((post) => (
                   <div key={post.id} className="glass-card p-4 rounded-lg space-y-3">
                     <div className="relative aspect-video rounded-lg overflow-hidden bg-muted">
                       <img src={post.thumbnail} alt="Post" className="w-full h-full object-cover" />
@@ -209,6 +223,43 @@ export function CreatorDetailDialog({ creator, open, onClose }: CreatorDetailDia
                   </div>
                 ))}
               </div>
+              
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 pt-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    Previous
+                  </Button>
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <Button
+                        key={page}
+                        variant={currentPage === page ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setCurrentPage(page)}
+                        className="w-8 h-8 p-0"
+                      >
+                        {page}
+                      </Button>
+                    ))}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    Next
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </ScrollArea>

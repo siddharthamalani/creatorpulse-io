@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, SlidersHorizontal, Sparkles, Check } from "lucide-react";
+import { Search, SlidersHorizontal, Sparkles, Check, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -135,6 +135,35 @@ export function CreatorFilters({ filters, onFilterChange, onSearch }: CreatorFil
                 })}
               </CommandGroup>
             </CommandList>
+            {selectedValues.length > 0 && (
+              <div className="border-t p-2 space-y-2">
+                <div className="text-xs font-medium text-muted-foreground px-2">Applied Filters</div>
+                <div className="flex flex-wrap gap-1 px-2">
+                  {selectedValues.map((value) => (
+                    <Badge key={value} variant="secondary" className="gap-1 text-xs">
+                      {value}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          updateMultiSelectFilter(filter.key, value);
+                        }}
+                        className="ml-1 hover:text-destructive"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full text-xs"
+                  onClick={() => deselectAll(filter.key)}
+                >
+                  Clear All
+                </Button>
+              </div>
+            )}
           </Command>
         </PopoverContent>
       </Popover>
@@ -193,20 +222,34 @@ export function CreatorFilters({ filters, onFilterChange, onSearch }: CreatorFil
               Add Filter
             </Button>
             {numericFilters.length > 0 && (
-              <div className="space-y-1 pt-2 border-t">
-                {numericFilters.map((nf, idx) => (
-                  <Badge key={idx} variant="secondary" className="gap-1 w-full justify-between">
-                    <span>
-                      {nf.operator === 'gt' ? '>' : nf.operator === 'lt' ? '<' : '='} {nf.value}
-                    </span>
-                    <button
-                      onClick={() => removeNumericFilter(filter.key, idx)}
-                      className="hover:text-destructive"
-                    >
-                      ×
-                    </button>
-                  </Badge>
-                ))}
+              <div className="space-y-2 pt-2 border-t">
+                <div className="text-xs font-medium text-muted-foreground">Applied Filters</div>
+                <div className="space-y-1">
+                  {numericFilters.map((nf, idx) => (
+                    <Badge key={idx} variant="secondary" className="gap-1 w-full justify-between">
+                      <span>
+                        {nf.operator === 'gt' ? '>' : nf.operator === 'lt' ? '<' : '='} {nf.value}
+                      </span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeNumericFilter(filter.key, idx);
+                        }}
+                        className="hover:text-destructive"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full text-xs"
+                  onClick={() => onFilterChange({ ...filters, [filter.key]: [] } as FilterType)}
+                >
+                  Clear All
+                </Button>
               </div>
             )}
           </div>
@@ -258,53 +301,6 @@ export function CreatorFilters({ filters, onFilterChange, onSearch }: CreatorFil
         </Popover>
       </div>
 
-      {getActiveFilterCount() > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {Object.entries(filters).map(([key, values]) =>
-            key === 'followers' || key === 'views' || key === 'engagementsPerPost' 
-              ? (values as NumericFilter[]).map((filter, idx) => (
-                  <Badge key={`${key}-${idx}`} variant="secondary" className="gap-1">
-                    {key}: {filter.operator === 'gt' ? '>' : filter.operator === 'lt' ? '<' : '='} {filter.value}
-                    <button
-                      onClick={() => removeNumericFilter(key, idx)}
-                      className="ml-1 hover:text-destructive"
-                    >
-                      ×
-                    </button>
-                  </Badge>
-                ))
-              : (values as string[]).map((value) => (
-                  <Badge key={`${key}-${value}`} variant="secondary" className="gap-1">
-                    {value}
-                    <button
-                      onClick={() => updateMultiSelectFilter(key, value)}
-                      className="ml-1 hover:text-destructive"
-                    >
-                      ×
-                    </button>
-                  </Badge>
-                ))
-          )}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onFilterChange({
-              socialNetwork: [],
-              followers: [],
-              creatorsProfile: [],
-              views: [],
-              engagementsPerPost: [],
-              country: [],
-              language: [],
-              industry: [],
-              brandsWorkedWith: [],
-              relevanceFactor: [],
-            })}
-          >
-            Clear All
-          </Button>
-        </div>
-      )}
     </div>
   );
 }
