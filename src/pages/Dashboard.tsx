@@ -1,42 +1,48 @@
 import { Card } from "@/components/ui/card";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { TrendingUp, Eye, Users, Star } from "lucide-react";
+import { TrendingUp, Eye, Users, Video, Image as ImageIcon, Heart, MessageCircle, ChevronRight } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState } from "react";
 
 const trendingPosts = [
-  { id: 1, title: "Summer Fashion Trends 2025", views: "2.5M", engagement: "15%" },
-  { id: 2, title: "Tech Review: Latest Gadgets", views: "1.8M", engagement: "12%" },
-  { id: 3, title: "Fitness Challenge Results", views: "3.2M", engagement: "18%" },
+  { id: 1, type: "video", creator: "Sarah Johnson", platform: "Instagram", followers: "850K", likes: "45.2K", comments: "1.2K", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=post1" },
+  { id: 2, type: "image", creator: "Mike Chen", platform: "TikTok", followers: "1.2M", likes: "89.5K", comments: "3.4K", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=post2" },
+  { id: 3, type: "video", creator: "Emma Davis", platform: "YouTube", followers: "650K", likes: "23.1K", comments: "890", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=post3" },
+  { id: 4, type: "image", creator: "Alex Rivera", platform: "Instagram", followers: "2.5M", likes: "120K", comments: "5.6K", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=post4" },
+  { id: 5, type: "video", creator: "Jessica Lee", platform: "TikTok", followers: "1.9M", likes: "95.3K", comments: "4.2K", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=post5" },
+  { id: 6, type: "image", creator: "David Kim", platform: "YouTube", followers: "1.7M", likes: "67.8K", comments: "2.1K", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=post6" },
+  { id: 7, type: "video", creator: "Sophie Turner", platform: "Instagram", followers: "1.5M", likes: "54.9K", comments: "1.8K", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=post7" },
+  { id: 8, type: "image", creator: "John Martinez", platform: "TikTok", followers: "980K", likes: "42.3K", comments: "1.5K", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=post8" },
+  { id: 9, type: "video", creator: "Lisa Wang", platform: "YouTube", followers: "2.1M", likes: "103K", comments: "4.8K", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=post9" },
+  { id: 10, type: "image", creator: "Ryan Park", platform: "Instagram", followers: "1.3M", likes: "71.2K", comments: "2.9K", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=post10" },
 ];
 
 const recentCreators = [
-  { name: "Sarah Johnson", handle: "@sarahj", followers: "850K", category: "Fashion" },
-  { name: "Mike Chen", handle: "@miketech", followers: "1.2M", category: "Tech" },
-  { name: "Emma Davis", handle: "@emmafitness", followers: "650K", category: "Fitness" },
+  { name: "Samantha Roy", handle: "@samanthar", platform: "Instagram", followers: "125K", category: "Beauty", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=samantha" },
+  { name: "Mike Chen", handle: "@miketech", platform: "TikTok", followers: "1.2M", category: "Tech", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=mike" },
+  { name: "Emma Davis", handle: "@emmafitness", platform: "YouTube", followers: "650K", category: "Fitness", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=emma" },
 ];
 
-const topCreators = [
-  { name: "Alex Rivera", handle: "@alexr", followers: "2.5M", engagement: "8.5%", category: "Lifestyle" },
-  { name: "Jessica Lee", handle: "@jesslee", followers: "1.9M", engagement: "9.2%", category: "Beauty" },
-  { name: "David Kim", handle: "@davidk", followers: "1.7M", engagement: "7.8%", category: "Gaming" },
-  { name: "Sophie Turner", handle: "@sophiet", followers: "1.5M", engagement: "10.1%", category: "Travel" },
+const topCreatorsData = [
+  { name: "Samantha Roy", platform: "Instagram", followers: "140K", engagement: "1236.4", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=samantha" },
+  { name: "Alex Rivera", platform: "TikTok", followers: "2.5M", engagement: "8542.1", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=alex" },
+  { name: "Jessica Lee", platform: "YouTube", followers: "1.9M", engagement: "7234.8", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=jessica" },
 ];
 
 export default function Dashboard() {
+  const [filterBy, setFilterBy] = useState("engagement");
+
   return (
     <DashboardLayout>
       <div className="space-y-8 animate-fade-in">
         {/* Welcome Section */}
         <div className="glass-card p-8 rounded-2xl">
-          <div className="flex items-center gap-4">
-            <div className="h-16 w-16 rounded-full gradient-primary flex items-center justify-center glow-primary">
-              <Star className="h-8 w-8 text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold mb-2">Welcome Back! 👋</h1>
-              <p className="text-muted-foreground">Here's what's happening with your campaigns today.</p>
-            </div>
+          <div>
+            <h1 className="text-4xl font-bold mb-3 text-gradient">Ready to discover your next influencer?</h1>
+            <p className="text-muted-foreground text-lg">Track trends, manage campaigns, and connect with top creators.</p>
           </div>
         </div>
 
@@ -46,18 +52,36 @@ export default function Dashboard() {
             <TrendingUp className="h-5 w-5 text-primary" />
             <h2 className="text-2xl font-bold">Trending Posts</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
             {trendingPosts.map((post) => (
-              <Card key={post.id} className="glass-card p-6 hover:scale-105 transition-transform cursor-pointer">
-                <h3 className="font-semibold mb-3">{post.title}</h3>
-                <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Eye className="h-4 w-4" />
-                    <span>{post.views}</span>
+              <Card key={post.id} className="glass-card p-4 min-w-[280px] hover:scale-105 transition-transform cursor-pointer">
+                <div className="relative mb-3">
+                  <img src={post.image} alt={post.creator} className="w-full h-40 object-cover rounded-lg" />
+                  <div className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm rounded-full p-2">
+                    {post.type === "video" ? <Video className="h-4 w-4 text-primary" /> : <ImageIcon className="h-4 w-4 text-secondary" />}
                   </div>
-                  <Badge className="bg-primary/20 text-primary border-primary/30">
-                    {post.engagement} engagement
-                  </Badge>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage src={post.image} />
+                    </Avatar>
+                    <span className="font-semibold text-sm">{post.creator}</span>
+                    <Badge variant="outline" className="text-xs">{post.platform}</Badge>
+                  </div>
+                  <div className="flex items-center justify-between text-sm text-muted-foreground">
+                    <span>{post.followers} followers</span>
+                  </div>
+                  <div className="flex items-center gap-4 text-sm">
+                    <div className="flex items-center gap-1">
+                      <Heart className="h-4 w-4 text-accent" />
+                      <span>{post.likes}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <MessageCircle className="h-4 w-4 text-secondary" />
+                      <span>{post.comments}</span>
+                    </div>
+                  </div>
                 </div>
               </Card>
             ))}
@@ -68,57 +92,87 @@ export default function Dashboard() {
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Recently Viewed Creators */}
           <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Eye className="h-5 w-5 text-secondary" />
-              <h2 className="text-2xl font-bold">Recently Viewed</h2>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Eye className="h-5 w-5 text-secondary" />
+                <h2 className="text-2xl font-bold">Recently Viewed Creators</h2>
+              </div>
             </div>
             <div className="space-y-3">
               {recentCreators.map((creator, i) => (
                 <Card key={i} className="glass-card p-4 hover:bg-white/5 transition-colors cursor-pointer">
                   <div className="flex items-center gap-4">
                     <Avatar className="h-12 w-12 border-2 border-primary/20">
-                      <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${creator.name}`} />
+                      <AvatarImage src={creator.image} />
                       <AvatarFallback>{creator.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
                       <h3 className="font-semibold">{creator.name}</h3>
-                      <p className="text-sm text-muted-foreground">{creator.handle}</p>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <span>{creator.handle}</span>
+                        <Badge variant="outline" className="text-xs">{creator.platform}</Badge>
+                      </div>
                     </div>
                     <div className="text-right">
                       <p className="font-semibold">{creator.followers}</p>
-                      <Badge variant="outline" className="text-xs">{creator.category}</Badge>
+                      <Badge className="text-xs bg-accent/20 text-accent border-accent/30">{creator.category}</Badge>
                     </div>
                   </div>
                 </Card>
               ))}
+              <Button variant="ghost" className="w-full text-primary hover:text-primary hover:bg-primary/10">
+                Show All <ChevronRight className="ml-2 h-4 w-4" />
+              </Button>
             </div>
           </div>
 
           {/* Top Creators */}
           <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-accent" />
-              <h2 className="text-2xl font-bold">Top Creators</h2>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-accent" />
+                <h2 className="text-2xl font-bold">Top Creators</h2>
+              </div>
+              <Select value={filterBy} onValueChange={setFilterBy}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="engagement">Engagement per Post</SelectItem>
+                  <SelectItem value="followers">Followers</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-3">
-              {topCreators.map((creator, i) => (
+              {topCreatorsData.map((creator, i) => (
                 <Card key={i} className="glass-card p-4 hover:bg-white/5 transition-colors cursor-pointer">
                   <div className="flex items-center gap-4">
                     <Avatar className="h-12 w-12 border-2 border-accent/20">
-                      <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${creator.name}`} />
+                      <AvatarImage src={creator.image} />
                       <AvatarFallback>{creator.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
-                      <h3 className="font-semibold">{creator.name}</h3>
-                      <p className="text-sm text-muted-foreground">{creator.handle}</p>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold">{creator.name}</h3>
+                        <Badge variant="outline" className="text-xs">{creator.platform}</Badge>
+                      </div>
+                      <div className="text-sm text-muted-foreground mt-1">
+                        {filterBy === "engagement" ? (
+                          <span>Engagement per Post: <span className="text-accent font-semibold">{creator.engagement}</span></span>
+                        ) : (
+                          <span>Followers: <span className="text-accent font-semibold">{creator.followers}</span></span>
+                        )}
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-semibold">{creator.followers}</p>
-                      <p className="text-xs text-muted-foreground">{creator.engagement} engagement</p>
+                    <div className="text-right text-sm text-muted-foreground">
+                      {filterBy === "engagement" ? `${creator.followers} followers` : `${creator.engagement} avg engagement`}
                     </div>
                   </div>
                 </Card>
               ))}
+              <Button variant="ghost" className="w-full text-primary hover:text-primary hover:bg-primary/10">
+                Show All <ChevronRight className="ml-2 h-4 w-4" />
+              </Button>
             </div>
           </div>
         </div>

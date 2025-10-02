@@ -1,4 +1,4 @@
-import { Home, Users, FileText, Folder, Settings } from "lucide-react";
+import { Home, Users, FileText, FolderKanban, Settings } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import {
   Sidebar,
@@ -13,11 +13,11 @@ import {
 } from "@/components/ui/sidebar";
 
 const menuItems = [
-  { title: "Home", url: "/dashboard", icon: Home },
-  { title: "Creators", url: "/creators", icon: Users },
-  { title: "Content Library", url: "/content", icon: FileText },
-  { title: "Projects", url: "/projects", icon: Folder },
-  { title: "Settings", url: "/settings", icon: Settings },
+  { title: "Home", url: "/dashboard", icon: Home, description: "Landing Page for Users" },
+  { title: "Creators", url: "/creators", icon: Users, description: "Discovery Page" },
+  { title: "Content Library", url: "/content", icon: FileText, description: "Discover Trends among creators" },
+  { title: "Projects", url: "/projects", icon: FolderKanban, description: "Past Projects" },
+  { title: "Settings", url: "/settings", icon: Settings, description: "About Profile & Brand" },
 ];
 
 export function AppSidebar() {
