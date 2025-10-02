@@ -5,6 +5,22 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Sparkles, TrendingUp, Users, Zap } from "lucide-react";
+import { z } from "zod";
+
+const authSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .email({ message: "Please enter a valid email address" })
+    .max(255, { message: "Email must be less than 255 characters" }),
+  password: z
+    .string()
+    .min(8, { message: "Password must be at least 8 characters" })
+    .max(100, { message: "Password must be less than 100 characters" })
+    .regex(/[a-z]/, { message: "Password must contain at least one lowercase letter" })
+    .regex(/[A-Z]/, { message: "Password must contain at least one uppercase letter" })
+    .regex(/[0-9]/, { message: "Password must contain at least one number" }),
+});
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -15,12 +31,17 @@ export default function Auth() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email || !password) {
-      toast.error("Please fill in all fields");
+    // Validate inputs
+    const validation = authSchema.safeParse({ email, password });
+    
+    if (!validation.success) {
+      const errors = validation.error.errors;
+      toast.error(errors[0].message);
       return;
     }
 
-    // Simulate authentication
+    // TODO: Replace with real authentication (Lovable Cloud/Supabase)
+    // This is a simulated authentication for demo purposes only
     toast.success(isLogin ? "Welcome back!" : "Account created successfully!");
     setTimeout(() => navigate("/dashboard"), 1000);
   };
