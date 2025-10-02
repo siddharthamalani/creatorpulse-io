@@ -39,10 +39,10 @@ export default function Dashboard() {
     <DashboardLayout>
       <div className="space-y-8 animate-fade-in">
         {/* Welcome Section */}
-        <div className="glass-card p-8 rounded-2xl">
+        <div className="glass-card p-4 md:p-6 lg:p-8 rounded-2xl">
           <div>
-            <h1 className="text-4xl font-bold mb-3 text-gradient">Ready to discover your next influencer?</h1>
-            <p className="text-muted-foreground text-lg">Track trends, manage campaigns, and connect with top creators.</p>
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-3 text-gradient">Ready to discover your next influencer?</h1>
+            <p className="text-muted-foreground text-sm md:text-base lg:text-lg">Track trends, manage campaigns, and connect with top creators.</p>
           </div>
         </div>
 
@@ -52,9 +52,9 @@ export default function Dashboard() {
             <TrendingUp className="h-5 w-5 text-primary" />
             <h2 className="text-2xl font-bold">Trending Posts</h2>
           </div>
-          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+          <div className="flex gap-3 md:gap-4 overflow-x-auto pb-4 -mx-4 px-4 md:mx-0 md:px-0">
             {trendingPosts.map((post) => (
-              <Card key={post.id} className="glass-card p-4 min-w-[280px] hover:scale-105 transition-transform cursor-pointer">
+              <Card key={post.id} className="glass-card p-3 md:p-4 min-w-[240px] md:min-w-[280px] flex-shrink-0 hover:scale-105 transition-transform cursor-pointer">
                 <div className="relative mb-3">
                   <img src={post.image} alt={post.creator} className="w-full h-40 object-cover rounded-lg" />
                   <div className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm rounded-full p-2">
@@ -89,7 +89,7 @@ export default function Dashboard() {
         </div>
 
         {/* Recently Viewed & Top Creators */}
-        <div className="grid lg:grid-cols-2 gap-8">
+        <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
           {/* Recently Viewed Creators */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -134,7 +134,7 @@ export default function Dashboard() {
                 <h2 className="text-2xl font-bold">Top Creators</h2>
               </div>
               <Select value={filterBy} onValueChange={setFilterBy}>
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-full sm:w-[180px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
