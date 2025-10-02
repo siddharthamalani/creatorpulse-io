@@ -1,18 +1,15 @@
 import { useState } from "react";
-import { Search, SlidersHorizontal, Sparkles } from "lucide-react";
+import { Search, SlidersHorizontal, Sparkles, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuCheckboxItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { FilterType } from "@/types/creator";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { FilterType, NumericFilter } from "@/types/creator";
 import { z } from "zod";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface CreatorFiltersProps {
   filters: FilterType;
@@ -24,13 +21,11 @@ export function CreatorFilters({ filters, onFilterChange, onSearch }: CreatorFil
   const [searchQuery, setSearchQuery] = useState("");
   const [showSecondary, setShowSecondary] = useState(false);
 
-  // Input validation schema
   const searchSchema = z.string()
     .max(200, "Search query too long")
     .regex(/^[a-zA-Z0-9\s,.\-_@#&()]*$/, "Invalid characters in search");
 
   const handleSearchChange = (value: string) => {
-    // Validate search input
     const validation = searchSchema.safeParse(value);
     if (!validation.success) {
       toast.error(validation.error.errors[0].message);
@@ -42,36 +37,186 @@ export function CreatorFilters({ filters, onFilterChange, onSearch }: CreatorFil
   };
 
   const primaryFilters = [
-    { key: "socialNetwork", label: "Social Network", options: ["Instagram", "YouTube", "TikTok", "Twitter", "LinkedIn"] },
-    { key: "followers", label: "Followers", options: ["0-10K", "10K-50K", "50K-100K", "100K-500K", "500K+"] },
-    { key: "creatorsProfile", label: "Creator Profile", options: ["Lifestyle", "Tech", "Fashion", "Food", "Travel", "Gaming"] },
-    { key: "language", label: "Language", options: ["English", "Spanish", "French", "German", "Hindi", "Mandarin"] },
+    { key: "socialNetwork", label: "Social Network", type: "multiselect", options: ["Instagram", "YouTube", "TikTok", "Twitter", "LinkedIn", "Facebook"] },
+    { key: "followers", label: "Followers", type: "numeric", options: [] },
+    { key: "creatorsProfile", label: "Creator Profile", type: "multiselect", options: ["Lifestyle", "Tech", "Fashion", "Food", "Travel", "Gaming", "Beauty", "Fitness", "Music", "Entertainment"] },
+    { key: "language", label: "Language", type: "multiselect", options: ["English", "Spanish", "French", "German", "Hindi", "Mandarin", "Portuguese", "Japanese", "Korean", "Arabic"] },
   ];
 
   const secondaryFilters = [
-    { key: "views", label: "Views", options: ["0-1K", "1K-10K", "10K-100K", "100K-1M", "1M+"] },
-    { key: "engagementsPerPost", label: "Engagement/Post", options: ["0-100", "100-500", "500-1K", "1K-5K", "5K+"] },
-    { key: "country", label: "Country", options: ["USA", "UK", "India", "Canada", "Australia", "Germany"] },
-    { key: "industry", label: "Industry", options: ["Fashion", "Tech", "Beauty", "Food", "Travel", "Fitness"] },
-    { key: "brandsWorkedWith", label: "Brands Worked With", options: ["Nike", "Apple", "Samsung", "Adidas", "Coca-Cola"] },
-    { key: "relevanceFactor", label: "Relevance Factor", options: ["Low", "Medium", "High", "Very High"] },
+    { key: "views", label: "Views", type: "numeric", options: [] },
+    { key: "engagementsPerPost", label: "Engagement/Post", type: "numeric", options: [] },
+    { key: "country", label: "Country", type: "multiselect", options: ["USA", "UK", "India", "Canada", "Australia", "Germany", "France", "Brazil", "Japan", "South Korea"] },
+    { key: "industry", label: "Industry", type: "multiselect", options: ["Fashion", "Tech", "Beauty", "Food", "Travel", "Fitness", "Gaming", "Entertainment", "Education", "Healthcare"] },
+    { key: "brandsWorkedWith", label: "Brands Worked With", type: "multiselect", options: ["Nike", "Apple", "Samsung", "Adidas", "Coca-Cola", "Google", "Amazon", "Netflix", "Spotify"] },
+    { key: "relevanceFactor", label: "Relevance Factor", type: "multiselect", options: ["1", "2", "3", "4", "5"] },
   ];
 
-  const updateFilter = (key: keyof FilterType, value: string) => {
-    const currentValues = filters[key] || [];
+  const updateMultiSelectFilter = (key: string, value: string) => {
+    const currentValues = filters[key as keyof FilterType] as string[];
     const newValues = currentValues.includes(value)
       ? currentValues.filter(v => v !== value)
       : [...currentValues, value];
-    onFilterChange({ ...filters, [key]: newValues });
+    onFilterChange({ ...filters, [key]: newValues } as FilterType);
+  };
+
+  const updateNumericFilter = (key: string, filter: NumericFilter) => {
+    const currentFilters = filters[key as keyof FilterType] as NumericFilter[];
+    onFilterChange({ ...filters, [key]: [...currentFilters, filter] } as FilterType);
+  };
+
+  const removeNumericFilter = (key: string, index: number) => {
+    const currentFilters = filters[key as keyof FilterType] as NumericFilter[];
+    onFilterChange({ ...filters, [key]: currentFilters.filter((_, i) => i !== index) } as FilterType);
+  };
+
+  const selectAll = (key: string, options: string[]) => {
+    onFilterChange({ ...filters, [key]: options } as FilterType);
+  };
+
+  const deselectAll = (key: string) => {
+    onFilterChange({ ...filters, [key]: [] } as FilterType);
   };
 
   const getActiveFilterCount = () => {
-    return Object.values(filters).flat().length;
+    return Object.entries(filters).reduce((count, [_, values]) => count + values.length, 0);
+  };
+
+  const renderMultiSelectFilter = (filter: any) => {
+    const selectedValues = filters[filter.key as keyof FilterType] as string[];
+    const allSelected = selectedValues.length === filter.options.length;
+
+    return (
+      <Popover key={filter.key}>
+        <PopoverTrigger asChild>
+          <Button variant="outline" className="gap-2 justify-start">
+            {filter.label}
+            {selectedValues.length > 0 && (
+              <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
+                {selectedValues.length}
+              </Badge>
+            )}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[300px] p-0" align="start">
+          <Command>
+            <CommandInput placeholder={`Search ${filter.label.toLowerCase()}...`} />
+            <CommandList>
+              <CommandEmpty>No results found.</CommandEmpty>
+              <CommandGroup>
+                <CommandItem
+                  onSelect={() => allSelected ? deselectAll(filter.key) : selectAll(filter.key, filter.options)}
+                  className="font-medium"
+                >
+                  <div className={cn(
+                    "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
+                    allSelected ? "bg-primary text-primary-foreground" : "opacity-50"
+                  )}>
+                    {allSelected && <Check className="h-4 w-4" />}
+                  </div>
+                  Select All
+                </CommandItem>
+                {filter.options.map((option: string) => {
+                  const isSelected = selectedValues.includes(option);
+                  return (
+                    <CommandItem
+                      key={option}
+                      onSelect={() => updateMultiSelectFilter(filter.key, option)}
+                    >
+                      <div className={cn(
+                        "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
+                        isSelected ? "bg-primary text-primary-foreground" : "opacity-50"
+                      )}>
+                        {isSelected && <Check className="h-4 w-4" />}
+                      </div>
+                      {option}
+                    </CommandItem>
+                  );
+                })}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+    );
+  };
+
+  const renderNumericFilter = (filter: any) => {
+    const [operator, setOperator] = useState<'gt' | 'lt' | 'eq'>('gt');
+    const [value, setValue] = useState('');
+    const numericFilters = filters[filter.key as keyof FilterType] as NumericFilter[];
+
+    return (
+      <Popover key={filter.key}>
+        <PopoverTrigger asChild>
+          <Button variant="outline" className="gap-2">
+            {filter.label}
+            {numericFilters.length > 0 && (
+              <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
+                {numericFilters.length}
+              </Badge>
+            )}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[280px]" align="start">
+          <div className="space-y-3">
+            <div className="text-sm font-medium">{filter.label}</div>
+            <div className="flex gap-2">
+              <Select value={operator} onValueChange={(v: any) => setOperator(v)}>
+                <SelectTrigger className="w-[100px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="gt">Greater than</SelectItem>
+                  <SelectItem value="lt">Less than</SelectItem>
+                  <SelectItem value="eq">Equal to</SelectItem>
+                </SelectContent>
+              </Select>
+              <Input
+                type="number"
+                placeholder="Value"
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                className="flex-1"
+              />
+            </div>
+            <Button
+              size="sm"
+              className="w-full"
+              onClick={() => {
+                if (value) {
+                  updateNumericFilter(filter.key, { operator, value: parseFloat(value) });
+                  setValue('');
+                }
+              }}
+            >
+              Add Filter
+            </Button>
+            {numericFilters.length > 0 && (
+              <div className="space-y-1 pt-2 border-t">
+                {numericFilters.map((nf, idx) => (
+                  <Badge key={idx} variant="secondary" className="gap-1 w-full justify-between">
+                    <span>
+                      {nf.operator === 'gt' ? '>' : nf.operator === 'lt' ? '<' : '='} {nf.value}
+                    </span>
+                    <button
+                      onClick={() => removeNumericFilter(filter.key, idx)}
+                      className="hover:text-destructive"
+                    >
+                      ×
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </div>
+        </PopoverContent>
+      </Popover>
+    );
   };
 
   return (
-    <div className="space-y-4">
-      {/* AI Search Bar */}
+    <div className="space-y-3">
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <Sparkles className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-primary" />
@@ -83,86 +228,62 @@ export function CreatorFilters({ filters, onFilterChange, onSearch }: CreatorFil
         />
       </div>
 
-      {/* Primary Filters */}
-      <div className="flex flex-wrap gap-3">
-        {primaryFilters.map((filter) => (
-          <DropdownMenu key={filter.key}>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="gap-2">
-                {filter.label}
-                {filters[filter.key as keyof FilterType]?.length > 0 && (
-                  <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
-                    {filters[filter.key as keyof FilterType].length}
-                  </Badge>
-                )}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-xl border-white/10">
-              {filter.options.map((option) => (
-                <DropdownMenuCheckboxItem
-                  key={option}
-                  checked={filters[filter.key as keyof FilterType]?.includes(option)}
-                  onCheckedChange={() => updateFilter(filter.key as keyof FilterType, option)}
-                >
-                  {option}
-                </DropdownMenuCheckboxItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        ))}
+      <div className="flex flex-wrap gap-2">
+        {primaryFilters.map((filter) => 
+          filter.type === 'multiselect' ? renderMultiSelectFilter(filter) : renderNumericFilter(filter)
+        )}
 
-        {/* More Filters Button */}
-        <DropdownMenu open={showSecondary} onOpenChange={setShowSecondary}>
-          <DropdownMenuTrigger asChild>
+        <Popover open={showSecondary} onOpenChange={setShowSecondary}>
+          <PopoverTrigger asChild>
             <Button variant="outline" className="gap-2">
               <SlidersHorizontal className="h-4 w-4" />
               More Filters
-              {getActiveFilterCount() > 0 && (
+              {getActiveFilterCount() > primaryFilters.reduce((sum, f) => sum + (filters[f.key as keyof FilterType]?.length || 0), 0) && (
                 <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
-                  {getActiveFilterCount()}
+                  {getActiveFilterCount() - primaryFilters.reduce((sum, f) => sum + (filters[f.key as keyof FilterType]?.length || 0), 0)}
                 </Badge>
               )}
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-64 bg-background/95 backdrop-blur-xl border-white/10">
-            <div className="p-2 space-y-2">
-              {secondaryFilters.map((filter) => (
-                <div key={filter.key}>
-                  <p className="text-sm font-medium mb-1 px-2">{filter.label}</p>
-                  <Select onValueChange={(value) => updateFilter(filter.key as keyof FilterType, value)}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder={`Select ${filter.label}`} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {filter.options.map((option) => (
-                        <SelectItem key={option} value={option}>
-                          {option}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              ))}
+          </PopoverTrigger>
+          <PopoverContent align="start" className="w-[320px] p-3">
+            <div className="space-y-2">
+              <div className="text-sm font-semibold mb-2">Secondary Filters</div>
+              <div className="flex flex-wrap gap-2">
+                {secondaryFilters.map((filter) => 
+                  filter.type === 'multiselect' ? renderMultiSelectFilter(filter) : renderNumericFilter(filter)
+                )}
+              </div>
             </div>
-          </DropdownMenuContent>
-        </DropdownMenu>
+          </PopoverContent>
+        </Popover>
       </div>
 
-      {/* Active Filters */}
       {getActiveFilterCount() > 0 && (
         <div className="flex flex-wrap gap-2">
           {Object.entries(filters).map(([key, values]) =>
-            values.map((value) => (
-              <Badge key={`${key}-${value}`} variant="secondary" className="gap-1">
-                {value}
-                <button
-                  onClick={() => updateFilter(key as keyof FilterType, value)}
-                  className="ml-1 hover:text-destructive"
-                >
-                  ×
-                </button>
-              </Badge>
-            ))
+            key === 'followers' || key === 'views' || key === 'engagementsPerPost' 
+              ? (values as NumericFilter[]).map((filter, idx) => (
+                  <Badge key={`${key}-${idx}`} variant="secondary" className="gap-1">
+                    {key}: {filter.operator === 'gt' ? '>' : filter.operator === 'lt' ? '<' : '='} {filter.value}
+                    <button
+                      onClick={() => removeNumericFilter(key, idx)}
+                      className="ml-1 hover:text-destructive"
+                    >
+                      ×
+                    </button>
+                  </Badge>
+                ))
+              : (values as string[]).map((value) => (
+                  <Badge key={`${key}-${value}`} variant="secondary" className="gap-1">
+                    {value}
+                    <button
+                      onClick={() => updateMultiSelectFilter(key, value)}
+                      className="ml-1 hover:text-destructive"
+                    >
+                      ×
+                    </button>
+                  </Badge>
+                ))
           )}
           <Button
             variant="ghost"

@@ -19,6 +19,15 @@ export default function Creators() {
     brandsWorkedWith: [],
     relevanceFactor: [],
   });
+
+  const checkNumericFilter = (value: number, numericFilters: FilterType['followers']) => {
+    if (numericFilters.length === 0) return true;
+    return numericFilters.some(filter => {
+      if (filter.operator === 'gt') return value > filter.value;
+      if (filter.operator === 'lt') return value < filter.value;
+      return value === filter.value;
+    });
+  };
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCreator, setSelectedCreator] = useState<Creator | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -57,13 +66,21 @@ export default function Creators() {
     if (filters.brandsWorkedWith.length > 0 && !filters.brandsWorkedWith.some(b => creator.brandsCollaborated.includes(b))) {
       return false;
     }
+    if (filters.relevanceFactor.length > 0 && !filters.relevanceFactor.includes(creator.relevanceFactor.toString())) {
+      return false;
+    }
+
+    // Numeric filters
+    if (!checkNumericFilter(creator.followers, filters.followers)) return false;
+    if (!checkNumericFilter(creator.views, filters.views)) return false;
+    if (!checkNumericFilter(creator.engagementsPerPost, filters.engagementsPerPost)) return false;
 
     return true;
   });
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-4 animate-fade-in">
         <div>
           <h1 className="text-4xl font-bold text-gradient">Creators</h1>
           <p className="text-muted-foreground text-lg">Discover and manage your creator network.</p>

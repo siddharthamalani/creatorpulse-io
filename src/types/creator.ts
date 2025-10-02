@@ -37,12 +37,17 @@ export interface PlatformStat {
   posts: number;
 }
 
+export type NumericFilter = {
+  operator: 'gt' | 'lt' | 'eq';
+  value: number;
+};
+
 export type FilterType = {
   socialNetwork: string[];
-  followers: string[];
+  followers: NumericFilter[];
   creatorsProfile: string[];
-  views: string[];
-  engagementsPerPost: string[];
+  views: NumericFilter[];
+  engagementsPerPost: NumericFilter[];
   country: string[];
   language: string[];
   industry: string[];
