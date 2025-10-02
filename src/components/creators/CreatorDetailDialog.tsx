@@ -20,6 +20,10 @@ export function CreatorDetailDialog({ creator, open, onClose }: CreatorDetailDia
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 10;
   
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [creator?.id, open]);
+  
   if (!creator) return null;
 
   const totalPages = Math.ceil(creator.posts.length / postsPerPage);
@@ -47,10 +51,6 @@ export function CreatorDetailDialog({ creator, open, onClose }: CreatorDetailDia
     if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
     return num.toString();
   };
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [creator?.id, open]);
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
