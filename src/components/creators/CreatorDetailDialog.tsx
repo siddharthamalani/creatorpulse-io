@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, Video, Image as ImageIcon, ThumbsUp, MessageCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import { Creator } from "@/types/creator";
@@ -48,10 +48,16 @@ export function CreatorDetailDialog({ creator, open, onClose }: CreatorDetailDia
     return num.toString();
   };
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [creator?.id, open]);
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] p-0 glass-card border-white/10">
-        <ScrollArea className="h-full">
+      <DialogContent className="max-w-6xl max-h-[85vh] overflow-hidden p-0 glass-card border-white/10">
+        <DialogTitle className="sr-only">{creator.name}</DialogTitle>
+        <DialogDescription className="sr-only">Creator details</DialogDescription>
+        <ScrollArea className="max-h-[80vh]">
           <div className="p-6 space-y-6">
             {/* Header */}
             <div className="flex items-start justify-between">
@@ -187,7 +193,7 @@ export function CreatorDetailDialog({ creator, open, onClose }: CreatorDetailDia
                 {currentPosts.map((post) => (
                   <div key={post.id} className="glass-card p-4 rounded-lg space-y-3">
                     <div className="relative aspect-video rounded-lg overflow-hidden bg-muted">
-                      <img src={post.thumbnail} alt="Post" className="w-full h-full object-cover" />
+                      <img loading="lazy" src={post.thumbnail} alt="Post" className="w-full h-full object-cover" />
                       <div className="absolute top-2 right-2 bg-background/90 backdrop-blur-sm rounded-full p-2">
                         {post.type === "video" ? (
                           <Video className="h-4 w-4" />

@@ -301,6 +301,56 @@ export function CreatorFilters({ filters, onFilterChange, onSearch }: CreatorFil
         </Popover>
       </div>
 
+      {getActiveFilterCount() > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-sm font-medium">Active:</span>
+          {Object.entries(filters).map(([key, values]) =>
+            key === 'followers' || key === 'views' || key === 'engagementsPerPost'
+              ? (values as NumericFilter[]).map((filter, idx) => (
+                  <Badge key={`${key}-${idx}`} variant="secondary" className="gap-1">
+                    {key}: {filter.operator === 'gt' ? '>' : filter.operator === 'lt' ? '<' : '='} {filter.value}
+                    <button
+                      onClick={() => removeNumericFilter(key, idx)}
+                      className="ml-1 hover:text-destructive"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))
+              : (values as string[]).map((value) => (
+                  <Badge key={`${key}-${value}`} variant="secondary" className="gap-1">
+                    {value}
+                    <button
+                      onClick={() => updateMultiSelectFilter(key, value)}
+                      className="ml-1 hover:text-destructive"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))
+          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onFilterChange({
+              socialNetwork: [],
+              followers: [],
+              creatorsProfile: [],
+              views: [],
+              engagementsPerPost: [],
+              country: [],
+              language: [],
+              industry: [],
+              brandsWorkedWith: [],
+              relevanceFactor: [],
+            })}
+          >
+            Clear All
+          </Button>
+        </div>
+      )}
+
+
     </div>
   );
 }
