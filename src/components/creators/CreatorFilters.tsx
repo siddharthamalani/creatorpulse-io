@@ -11,6 +11,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { FilterType } from "@/types/creator";
+import { z } from "zod";
+import { toast } from "sonner";
 
 interface CreatorFiltersProps {
   filters: FilterType;
@@ -22,7 +24,19 @@ export function CreatorFilters({ filters, onFilterChange, onSearch }: CreatorFil
   const [searchQuery, setSearchQuery] = useState("");
   const [showSecondary, setShowSecondary] = useState(false);
 
+  // Input validation schema
+  const searchSchema = z.string()
+    .max(200, "Search query too long")
+    .regex(/^[a-zA-Z0-9\s,.\-_@#&()]*$/, "Invalid characters in search");
+
   const handleSearchChange = (value: string) => {
+    // Validate search input
+    const validation = searchSchema.safeParse(value);
+    if (!validation.success) {
+      toast.error(validation.error.errors[0].message);
+      return;
+    }
+    
     setSearchQuery(value);
     onSearch(value);
   };
