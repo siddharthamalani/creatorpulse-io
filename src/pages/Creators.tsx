@@ -3,6 +3,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { CreatorFilters } from "@/components/creators/CreatorFilters";
 import { CreatorTable } from "@/components/creators/CreatorTable";
 import { CreatorDetailDialog } from "@/components/creators/CreatorDetailDialog";
+import { AICreatorRecommendations } from "@/components/ai/AICreatorRecommendations";
 import { mockCreators } from "@/lib/mockCreators";
 import { Creator, FilterType } from "@/types/creator";
 
@@ -91,6 +92,8 @@ export default function Creators() {
           onFilterChange={setFilters}
           onSearch={setSearchQuery}
         />
+
+        <AICreatorRecommendations creators={filteredCreators} />
 
         <CreatorTable
           creators={filteredCreators}

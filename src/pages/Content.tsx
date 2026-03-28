@@ -1,8 +1,10 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { ContentFilters } from "@/components/content/ContentFilters";
 import { ContentSummary } from "@/components/content/ContentSummary";
 import { ContentPostCard } from "@/components/content/ContentPostCard";
+import { AIContentAnalysis } from "@/components/ai/AIContentAnalysis";
+import { AIContentSearch } from "@/components/ai/AIContentSearch";
 import { mockContentPosts } from "@/lib/mockContent";
 import { ContentFilterType, NumericContentFilter } from "@/types/content";
 import {
@@ -125,6 +127,14 @@ export default function Content() {
     []
   );
 
+  const handleAISearch = useCallback((searchQuery: string, aiFilters: Partial<ContentFilterType>) => {
+    if (searchQuery) setSearchQuery(searchQuery);
+    if (Object.keys(aiFilters).length > 0) {
+      setFilters(prev => ({ ...prev, ...aiFilters }));
+    }
+    setCurrentPage(1);
+  }, []);
+
   return (
     <DashboardLayout>
       <div className="space-y-6 animate-fade-in">
@@ -134,6 +144,8 @@ export default function Content() {
             Discover what influencers are saying about your brand and competitors
           </p>
         </div>
+
+        <AIContentSearch onApplyFilters={handleAISearch} />
 
         <ContentFilters
           filters={filters}
@@ -145,6 +157,8 @@ export default function Content() {
         />
 
         <ContentSummary {...summaryMetrics} />
+
+        <AIContentAnalysis posts={filteredPosts} />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {paginatedPosts.map(post => (
